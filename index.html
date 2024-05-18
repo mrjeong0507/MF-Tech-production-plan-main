@@ -170,8 +170,29 @@
 
         document.getElementById('work-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            // 제출 처리 로직을 여기에 추가
-            alert('작업 계획서가 제출되었습니다.');
+
+            const date = document.getElementById('date').value;
+            const process = document.getElementById('process').value;
+            const name = document.getElementById('name').value;
+            const workEntries = document.getElementById('work-entries').children;
+
+            const data = [
+                ['날짜', '공정', '이름', '작업내용', '작업수량', '예상작업시간 (분)']
+            ];
+
+            for (let i = 0; i < workEntries.length; i++) {
+                const work = workEntries[i].querySelector(`[id^=work-]`).value;
+                const quantity = workEntries[i].querySelector(`[id^=quantity-]`).value;
+                const time = workEntries[i].querySelector(`[id^=time-]`).value;
+                data.push([date, process, name, work, quantity, time]);
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "작업계획서");
+
+            XLSX.writeFile(wb, `작업계획서_${date}.xlsx`);
+            alert('작업 계획서가 엑셀 파일로 저장되었습니다.');
         });
     </script>
 </body>
