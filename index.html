@@ -27,7 +27,7 @@
         h1 {
             text-align: center;
             margin-bottom: 20px;
-            font-size: 80px;
+            font-size: 60px;
             line-height: 1.2;
             color: #fff;
         }
@@ -55,6 +55,20 @@
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 8px;
+            position: relative;
+        }
+        .work-entry button.remove-entry {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 5px 10px;
         }
         .add-entry {
             display: block;
@@ -148,6 +162,7 @@
                         <label for="time-0">예상작업시간 (분):</label>
                         <input type="number" id="time-0" name="time[]" placeholder="예상작업시간을 입력하세요" oninput="calculateSummary()">
                     </div>
+                    <button type="button" class="remove-entry" onclick="removeEntry(this)">삭제</button>
                 </div>
             </div>
             <button type="button" class="add-entry">작업 추가</button>
@@ -197,10 +212,17 @@
                     <label for="time-${newEntryIndex}">예상작업시간 (분):</label>
                     <input type="number" id="time-${newEntryIndex}" name="time[]" placeholder="예상작업시간을 입력하세요" oninput="calculateSummary()">
                 </div>
+                <button type="button" class="remove-entry" onclick="removeEntry(this)">삭제</button>
             `;
             workEntries.appendChild(newEntry);
             calculateSummary();
         });
+
+        function removeEntry(button) {
+            const entry = button.parentElement;
+            entry.remove();
+            calculateSummary();
+        }
 
         document.getElementById('work-form').addEventListener('submit', function(event) {
             event.preventDefault();
