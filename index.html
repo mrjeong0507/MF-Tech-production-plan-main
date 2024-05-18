@@ -83,7 +83,7 @@
             display: block;
             width: 100%;
             padding: 10px;
-            background: #0100FF;
+            background: #FFBB00;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -92,7 +92,7 @@
             font-weight: bold;
         }
         .add-entry:hover {
-            background:#0100FF;
+            background: #FFBB00;
         }
         button[type="submit"] {
             display: block;
@@ -129,6 +129,11 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+        .weekday {
+            margin-top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -139,6 +144,7 @@
             <div class="form-group">
                 <label for="date">날짜:</label>
                 <input type="date" id="date" name="date">
+                <div id="weekday" class="weekday"></div>
             </div>
             <div class="form-group">
                 <label for="process">공정:</label>
@@ -243,6 +249,17 @@
             entry.remove();
             calculateSummary();
         }
+
+        function getWeekday(date) {
+            const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+            return days[date.getDay()];
+        }
+
+        document.getElementById('date').addEventListener('input', function() {
+            const date = new Date(this.value);
+            const weekday = getWeekday(date);
+            document.getElementById('weekday').innerText = `요일: ${weekday}`;
+        });
 
         document.getElementById('work-form').addEventListener('submit', function(event) {
             event.preventDefault();
