@@ -9,7 +9,7 @@
     <meta property="og:title" content="엠에프테크 생산작업계획서">
     <meta property="og:description" content="엠에프테크의 생산작업계획서를 작성하고 관리하세요.">
     <meta property="og:image" content="https://mf-production-plan.netlify.app/logo.jpg">
-    <meta property="og:url" content="https://mf-production-plan.netlify.app">
+    <meta property="og:url" content="https://mf-production-plan.netlify.app/">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -83,7 +83,7 @@
             display: block;
             width: 100%;
             padding: 10px;
-            background: #007BFF;
+            background: #0100FF;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -92,7 +92,7 @@
             font-weight: bold;
         }
         .add-entry:hover {
-            background: #0056b3;
+            background:#0100FF;
         }
         button[type="submit"] {
             display: block;
@@ -119,6 +119,15 @@
             font-size: 30px;
             font-weight: bold;
             margin: 10px 0;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background: #333;
+            border-radius: 8px;
+            color: #fff;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
     </style>
 </head>
@@ -183,6 +192,7 @@
             </div>
             <button type="submit">제출</button>
         </form>
+        <textarea id="output" class="output" rows="10" readonly></textarea>
     </div>
     <script>
         function calculateSummary() {
@@ -308,7 +318,9 @@
             }
 
             XLSX.writeFile(wb, `작업계획서_${date}.xlsx`);
-            alert(alertMessage);
+
+            // Display the alert message in the textarea
+            document.getElementById('output').value = alertMessage;
         });
 
         // 초기화 시 합계 계산
