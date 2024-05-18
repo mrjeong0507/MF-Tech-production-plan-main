@@ -214,11 +214,15 @@
                 ['날짜', '공정', '이름', '작업내용', '작업수량', '예상작업시간 (분)']
             ];
 
-            workEntries.forEach(entry => {
+            let alertMessage = `날짜: ${date}\n공정: ${process}\n이름: ${name}\n\n작업 항목:\n`;
+
+            workEntries.forEach((entry, index) => {
                 const work = entry.querySelector(`[id^=work-]`).value;
                 const quantity = entry.querySelector(`[id^=quantity-]`).value;
                 const time = entry.querySelector(`[id^=time-]`).value;
                 data.push([date, process, name, work, quantity, time]);
+
+                alertMessage += `\n작업 항목 ${index + 1}:\n작업내용: ${work}\n작업수량: ${quantity}\n예상작업시간 (분): ${time}\n`;
             });
 
             // Add summary to the Excel data
@@ -230,6 +234,8 @@
             data.push(['총 작업수량', totalQuantity]);
             data.push(['총 예상작업시간 (분)', totalTime]);
             data.push(['작업률 (%)', workRate]);
+
+            alertMessage += `\n총 작업수량: ${totalQuantity}\n총 예상작업시간 (분): ${totalTime}\n작업률 (%): ${workRate}`;
 
             const ws = XLSX.utils.aoa_to_sheet(data);
 
@@ -270,7 +276,7 @@
             }
 
             XLSX.writeFile(wb, `작업계획서_${date}.xlsx`);
-            alert('작업 계획서가 엑셀 파일로 저장되었습니다.');
+            alert(alertMessage);
         });
 
         // 초기화 시 합계 계산
