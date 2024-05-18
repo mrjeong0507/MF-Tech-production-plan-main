@@ -86,6 +86,17 @@
         button[type="submit"]:hover {
             background: #218838;
         }
+        .summary {
+            margin-top: 20px;
+            padding: 20px;
+            background: #222;
+            border-radius: 8px;
+        }
+        .summary p {
+            font-size: 30px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -131,19 +142,41 @@
                     </div>
                     <div class="form-group">
                         <label for="quantity-0">작업수량:</label>
-                        <input type="number" id="quantity-0" name="quantity[]" placeholder="작업수량을 입력하세요">
+                        <input type="number" id="quantity-0" name="quantity[]" placeholder="작업수량을 입력하세요" oninput="calculateSummary()">
                     </div>
                     <div class="form-group">
                         <label for="time-0">예상작업시간 (분):</label>
-                        <input type="number" id="time-0" name="time[]" placeholder="예상작업시간을 입력하세요">
+                        <input type="number" id="time-0" name="time[]" placeholder="예상작업시간을 입력하세요" oninput="calculateSummary()">
                     </div>
                 </div>
             </div>
             <button type="button" class="add-entry">작업 추가</button>
+            <div class="summary">
+                <p id="total-quantity">총 작업수량: 0</p>
+                <p id="total-time">총 예상작업시간 (분): 0</p>
+                <p id="work-rate">작업률 (%): 0%</p>
+            </div>
             <button type="submit">제출</button>
         </form>
     </div>
     <script>
+        function calculateSummary() {
+            const workEntries = document.querySelectorAll('.work-entry');
+            let totalQuantity = 0;
+            let totalTime = 0;
+
+            workEntries.forEach(entry => {
+                const quantity = entry.querySelector(`[id^=quantity-]`).value;
+                const time = entry.querySelector(`[id^=time-]`).value;
+                totalQuantity += parseInt(quantity, 10) || 0;
+                totalTime += parseInt(time, 10) || 0;
+            });
+
+            document.getElementById('total-quantity').innerText = `총 작업수량: ${totalQuantity}`;
+            document.getElementById('total-time').innerText = `총 예상작업시간 (분): ${totalTime}`;
+            document.getElementById('work-rate').innerText = `작업률 (%): ${(totalTime / 480 * 100).toFixed(2)}%`;
+        }
+
         document.querySelector('.add-entry').addEventListener('click', function() {
             const workEntries = document.getElementById('work-entries');
             const newEntryIndex = workEntries.children.length;
@@ -158,14 +191,15 @@
                 </div>
                 <div class="form-group">
                     <label for="quantity-${newEntryIndex}">작업수량:</label>
-                    <input type="number" id="quantity-${newEntryIndex}" name="quantity[]" placeholder="작업수량을 입력하세요">
+                    <input type="number" id="quantity-${newEntryIndex}" name="quantity[]" placeholder="작업수량을 입력하세요" oninput="calculateSummary()">
                 </div>
                 <div class="form-group">
                     <label for="time-${newEntryIndex}">예상작업시간 (분):</label>
-                    <input type="number" id="time-${newEntryIndex}" name="time[]" placeholder="예상작업시간을 입력하세요">
+                    <input type="number" id="time-${newEntryIndex}" name="time[]" placeholder="예상작업시간을 입력하세요" oninput="calculateSummary()">
                 </div>
             `;
             workEntries.appendChild(newEntry);
+            calculateSummary();
         });
 
         document.getElementById('work-form').addEventListener('submit', function(event) {
@@ -174,26 +208,73 @@
             const date = document.getElementById('date').value;
             const process = document.getElementById('process').value;
             const name = document.getElementById('name').value;
-            const workEntries = document.getElementById('work-entries').children;
+            const workEntries = document.querySelectorAll('.work-entry');
 
             const data = [
                 ['날짜', '공정', '이름', '작업내용', '작업수량', '예상작업시간 (분)']
             ];
 
-            for (let i = 0; i < workEntries.length; i++) {
-                const work = workEntries[i].querySelector(`[id^=work-]`).value;
-                const quantity = workEntries[i].querySelector(`[id^=quantity-]`).value;
-                const time = workEntries[i].querySelector(`[id^=time-]`).value;
+            workEntries.forEach(entry => {
+                const work = entry.querySelector(`[id^=work-]`).value;
+                const quantity = entry.querySelector(`[id^=quantity-]`).value;
+                const time = entry.querySelector(`[id^=time-]`).value;
                 data.push([date, process, name, work, quantity, time]);
-            }
+            });
+
+            // Add summary to the Excel data
+            const totalQuantity = document.getElementById('total-quantity').innerText.split(': ')[1];
+            const totalTime = document.getElementById('total-time').innerText.split(': ')[1];
+            const workRate = document.getElementById('work-rate').innerText.split(': ')[1];
+
+            data.push([]);
+            data.push(['총 작업수량', totalQuantity]);
+            data.push(['총 예상작업시간 (분)', totalTime]);
+            data.push(['작업률 (%)', workRate]);
 
             const ws = XLSX.utils.aoa_to_sheet(data);
+
+            // Set column widths
+            const colWidths = [
+                { wch: 10 }, // 날짜
+                { wch: 10 }, // 공정
+                { wch: 10 }, // 이름
+                { wch: 20 }, // 작업내용
+                { wch: 15 }, // 작업수량
+                { wch: 20 }, // 예상작업시간 (분)
+            ];
+            ws['!cols'] = colWidths;
+
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "작업계획서");
+
+            // Style the sheet
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for(let R = range.s.r; R <= range.e.r; ++R) {
+                for(let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell = ws[XLSX.utils.encode_cell({r:R, c:C})];
+                    if(cell) {
+                        cell.s = {
+                            border: {
+                                top: { style: "thin", color: { rgb: "000000" } },
+                                bottom: { style: "thin", color: { rgb: "000000" } },
+                                left: { style: "thin", color: { rgb: "000000" } },
+                                right: { style: "thin", color: { rgb: "000000" } }
+                            },
+                            alignment: {
+                                vertical: "center",
+                                horizontal: "center"
+                            }
+                        };
+                    }
+                }
+            }
 
             XLSX.writeFile(wb, `작업계획서_${date}.xlsx`);
             alert('작업 계획서가 엑셀 파일로 저장되었습니다.');
         });
+
+        // 초기화 시 합계 계산
+        calculateSummary();
     </script>
 </body>
 </html>
