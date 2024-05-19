@@ -83,7 +83,7 @@
             display: block;
             width: 100%;
             padding: 10px;
-            background: #FFBB00;
+            background: #007BFF;
             color: #fff;
             border: none;
             border-radius: 8px;
@@ -92,7 +92,7 @@
             font-weight: bold;
         }
         .add-entry:hover {
-            background: #FFBB00;
+            background: #0056b3;
         }
         button[type="submit"] {
             display: block;
@@ -268,12 +268,13 @@
             const process = document.getElementById('process').value;
             const name = document.getElementById('name').value;
             const workEntries = document.querySelectorAll('.work-entry');
+            const weekday = getWeekday(new Date(date)); // 요일 계산 추가
 
             const data = [
                 ['날짜', '공정', '이름', '작업내용', '작업수량', '예상작업시간 (분)']
             ];
 
-            let alertMessage = `날짜: ${date}\n공정: ${process}\n이름: ${name}\n\n작업 항목:\n`;
+            let alertMessage = `날짜: ${date} (${weekday})\n공정: ${process}\n이름: ${name}\n\n작업 항목:\n`;
 
             workEntries.forEach((entry, index) => {
                 const work = entry.querySelector(`[id^=work-]`).value;
